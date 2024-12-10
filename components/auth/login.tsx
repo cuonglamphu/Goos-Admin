@@ -7,22 +7,32 @@ import { Button, Input } from "@nextui-org/react";
 import { Formik } from "formik";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
+import login from "@/APIs/login.api";
 
 export const Login = () => {
   const router = useRouter();
-
+  const [error, setError] = useState("");
   const initialValues: LoginFormType = {
-    email: "admin@acme.com",
+    email: "admin@goos.com",
     password: "admin",
   };
 
   const handleLogin = useCallback(
     async (values: LoginFormType) => {
       // `values` contains email & password. You can use provider to connect user
-
-      await createAuthCookie();
-      router.replace("/");
+      const response = await login(values.email, values.password);
+      if (response.success && response.data.user ) {
+        if(response.data.user.isAdmin === true){
+          await createAuthCookie(response.data.token);
+          router.replace("/");
+        }else{
+          setError("Admin account is required");
+        }
+      } else {
+        setError(response.message);
+        console.log(response.message);
+      }
     },
     [router]
   );
@@ -37,6 +47,7 @@ export const Login = () => {
         onSubmit={handleLogin}>
         {({ values, errors, touched, handleChange, handleSubmit }) => (
           <>
+            {error && <div className='text-red-500'>{error}</div>}
             <div className='flex flex-col w-1/2 gap-4 mb-4'>
               <Input
                 variant='bordered'

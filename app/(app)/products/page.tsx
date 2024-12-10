@@ -1,5 +1,5 @@
 "use client";
-import { Button, Input, useDisclosure } from "@nextui-org/react";
+import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@nextui-org/react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { DotsIcon } from "@/components/icons/accounts/dots-icon";
@@ -104,7 +104,8 @@ const products = () => {
         fetchProducts()
     }, [])
 
-
+    console.log(productForUpdate);
+    
   return (
     <div className="my-10 px-4 lg:px-6 max-w-[95rem] mx-auto w-full flex flex-col gap-4">
       <ul className="flex">
@@ -142,7 +143,7 @@ const products = () => {
           <DotsIcon />
         </div>
         <div className="flex flex-row gap-3.5 flex-wrap">
-          <AddProduct isOpen={isOpen} onOpenChange={onOpenChange} productForUpdate={productForUpdate ?? undefined} onSubmit={productForUpdate ? handleUpdateProduct : handleCreateProduct}/>
+          <AddProduct isOpen={isOpen} onOpenChange={onOpenChange} productForUpdate={productForUpdate} onSubmit={productForUpdate ? handleUpdateProduct : handleCreateProduct}/>
           <Button onPress={() => {
             onOpen()
             setProductForUpdate(null)
@@ -182,6 +183,16 @@ type TableWrapperProps = {
   }
 
 const TableWrapper = ({columns, products, updateAction, deleteAction}: TableWrapperProps) => {
+    const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+    const [idDelete, setIdDelete] = useState<string>('')
+    const handleOpenConfirmModal = (id: string) => {
+      setIdDelete(id)
+      onOpen()
+    }
+    const handleDelete = () => {
+      deleteAction(idDelete)
+      onClose()
+    }
     return (
       <div className=" w-full flex flex-col gap-4">
         <Table aria-label="Example table with custom cells">
@@ -202,13 +213,14 @@ const TableWrapper = ({columns, products, updateAction, deleteAction}: TableWrap
               <TableRow key={item._id}>
                 {(columnKey) => (
                   <TableCell>
-                    {RenderCell({ product: item, columnKey: columnKey, updateAction: updateAction, deleteAction: deleteAction })}
+                    {RenderCell({ product: item, columnKey: columnKey, updateAction: updateAction, deleteAction: handleOpenConfirmModal })}
                   </TableCell>
                 )}
               </TableRow>
             )}
           </TableBody>
         </Table>
+        <ConfirmModal isOpen={isOpen} onOpenChange={onOpenChange} onSubmit={handleDelete}/>
       </div>
     );
   };
@@ -224,7 +236,7 @@ interface Props {
     };
     columnKey: string | React.Key;
     updateAction: (slug: string) => Promise<void>
-    deleteAction: (slug: string) => Promise<void>
+    deleteAction: (slug: string) => void
 }
   
 export const RenderCell = ({ product, columnKey, updateAction, deleteAction }: Props) => {
@@ -293,4 +305,38 @@ export const RenderCell = ({ product, columnKey, updateAction, deleteAction }: P
     }
   };
 
+  export interface ConfirmModalProps {
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
+    onSubmit: () => void
+  }
+  
+  export function ConfirmModal({isOpen, onOpenChange, onSubmit}: ConfirmModalProps) {
+    return (
+      <>
+        <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+          <ModalContent>
+            {(onClose) => (
+              <>
+                <ModalHeader className="flex flex-col gap-1">Modal Title</ModalHeader>
+                <ModalBody>
+                  <p>
+                    Do you want to delete this ?
+                  </p>
+                </ModalBody>
+                <ModalFooter>
+                  <Button color="danger" variant="light" onPress={onClose}>
+                    Close
+                  </Button>
+                  <Button color="primary" onPress={onSubmit}>
+                    Delete
+                  </Button>
+                </ModalFooter>
+              </>
+            )}
+          </ModalContent>
+        </Modal>
+      </>
+    );
+  }
 export default products;

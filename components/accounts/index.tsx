@@ -1,5 +1,5 @@
 "use client";
-import { Button, Input } from "@nextui-org/react";
+import { Button, Input, useDisclosure } from "@nextui-org/react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { DotsIcon } from "@/components/icons/accounts/dots-icon";
@@ -9,10 +9,9 @@ import { TrashIcon } from "@/components/icons/accounts/trash-icon";
 import { HouseIcon } from "@/components/icons/breadcrumb/house-icon";
 import { UsersIcon } from "@/components/icons/breadcrumb/users-icon";
 import { SettingsIcon } from "@/components/icons/sidebar/settings-icon";
-// import { TableWrapper } from "@/components/table/table";
 import { TableWrapper } from "../../components/service/table";
 import { AddUser } from "./add-user";
-import { getAllUser } from "@/APIs/user.api";
+import { getAllUser,createUser, updateUser, getUserById, deleteUser } from "@/APIs/user.api";
 
 
 export type UserProps = {
@@ -38,27 +37,82 @@ const columns = [
 ];
 
 export const Accounts = () => {
+  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const [accounts, setAccounts] = useState<UserProps[] | null>(null);
-  useEffect(() => {
-    const fetchAccount = async () => {
-      try {
-        const data = await getAllUser()
-        if (data) {
-          const formattedData = data.map((item: UserFetch) => ({name: item.firstName + " " + item.lastName, email: item.email, _id: item._id, createdAt: item.createdAt}))
-          console.log(data)
-          setAccounts(formattedData)
-        }
-      } catch (error) {
-        console.error(error);
+  const [userForUpdate, setUserForUpdate] = useState(null)
+  const fetchAccounts = async () => {
+    try {
+      const data = await getAllUser()
+      if (data) {
+        const formattedData = data.map((item: UserFetch) => ({name: item.firstName + " " + item.lastName, email: item.email, _id: item._id, createdAt: item.createdAt}))
+        console.log(data)
+        setAccounts(formattedData)
       }
+    } catch (error) {
+      console.error(error);
     }
-    fetchAccount()
+  }
+
+  const handleShowDetail = async (id: string) => {
+    try {
+        const data = await getUserById(id);
+        if (data) {
+            console.log(data)
+            onOpen()
+            setUserForUpdate(data.data)
+        }
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+const handleCreateAccount = async (formdata: any) => {
+    console.log('add')
+    console.log(formdata);
+    try {
+      const result = await createUser(formdata)
+      if (result) {
+        console.log(result)
+        onClose()
+        fetchAccounts()
+      }
+    } catch (error) {
+      console.error(error)
+    }
+}
+
+const handleUpdateAccount = async (formdata: any) => {
+    console.log('update')
+    console.log(formdata);
+    try {
+      const result = await updateUser(formdata)
+      if (result) {
+        console.log(result)
+        onClose()
+        fetchAccounts()
+      }
+    } catch (error) {
+      console.error(error)
+    }
+}
+
+const handleDeleteAccount = async (id: string) => {
+    console.log(id);
+    
+    try {
+      const result = await deleteUser(id)
+      if (result) {
+        console.log(result)
+        fetchAccounts()
+      }
+    } catch (error) {
+      console.error(error)
+    }
+}
+  useEffect(() => {
+    fetchAccounts()
   },[])
 
-  if (accounts) {
-    console.log(accounts)
-  }
-  
   return (
     <div className="my-10 px-4 lg:px-6 max-w-[95rem] mx-auto w-full flex flex-col gap-4">
       <ul className="flex">
@@ -96,7 +150,13 @@ export const Accounts = () => {
           <DotsIcon />
         </div>
         <div className="flex flex-row gap-3.5 flex-wrap">
-          <AddUser />
+          <AddUser isOpen={isOpen} onOpenChange={onOpenChange} onSubmit={userForUpdate ? handleUpdateAccount : handleCreateAccount} userForUpdate={userForUpdate || undefined}/>
+          <Button onPress={() => {
+            onOpen()
+            setUserForUpdate(null)
+          }} color="primary">
+            Add User
+          </Button>
           <Button color="primary" startContent={<ExportIcon />}>
             Export to CSV
           </Button>
@@ -105,7 +165,7 @@ export const Accounts = () => {
       <div className="max-w-[95rem] mx-auto w-full">
         {
           accounts &&
-          <TableWrapper columns={columns} users={accounts}/>
+          <TableWrapper columns={columns} users={accounts} deleteAction={handleDeleteAccount } updateAction={handleShowDetail}/>
         }
       </div>
     </div>

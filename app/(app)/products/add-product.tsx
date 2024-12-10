@@ -1,3 +1,4 @@
+import { getAllCategory } from "@/APIs/catagory.api";
 import {
     Button,
     Checkbox,
@@ -10,13 +11,15 @@ import {
     ModalHeader,
     Textarea,
   } from "@nextui-org/react";
-  import React, { useEffect, useState } from "react";
+  import React, { ChangeEvent, useEffect, useState } from "react";
+  import Select from "@/components/Select"
+
   export interface Colour {
     name: string;
     colorClass: string;
     imgSrc: string;
-    oldPrice?: number;
-    price?: number;
+    oldPrice: number;
+    price: number;
   }
   
   export interface ProductFormData {
@@ -41,10 +44,17 @@ import {
   export interface ProductFormProps {
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
-    productForUpdate?: ProductFormData,
+    productForUpdate: ProductFormData | null,
     onSubmit: (formdata: any) => Promise<void>
   }
   
+  type Category = {
+    _id: string
+    title: string,
+    itemCount: string,
+    createdAt: string,
+  }
+
   const defaultValueProductForm: ProductFormData = {
     categoryId: "",
     title: "",
@@ -67,27 +77,18 @@ import {
   }
 
   export const AddProduct = ({isOpen, onOpenChange, productForUpdate, onSubmit}: ProductFormProps) => {
-      const [formData, setFormData] = useState<ProductFormData>({
-        categoryId: "",
-        title: "",
-        oldPrice: undefined,
-        price: 0,
-        colours: [
-          { name: "", colorClass: "", imgSrc: "", oldPrice: undefined, price: undefined },
-        ],
-        imgSrc: "",
-        imgHoverSrc: "",
-        altText: "",
-        size: [],
-        filterCategories: [],
-        brand: "",
-        isAvailable: true,
-        description: "",
-        soldOut: false,
-        preOrder: false,
-        isLookBookProduct: false,
-      });
-    
+      const [formData, setFormData] = useState<ProductFormData>(defaultValueProductForm);
+      const [categories, setCategories] = useState<Category[] | null>(null);
+      const fetchCategories = async () => {
+          try {
+              const data = await getAllCategory();
+              if (data) {
+                  setCategories(data.data)
+              }
+          } catch (error) {
+              console.error(error);
+          }
+      }
       const handleInputChange = (
         field: keyof ProductFormData,
         value: string | boolean | string[] | number | undefined
@@ -109,8 +110,8 @@ import {
         setFormData({
           ...formData,
           colours: [
-            ...formData.colours,
-            { name: "", colorClass: "", imgSrc: "", oldPrice: undefined, price: undefined },
+            ...formData.colours ,
+            { name: "", colorClass: "", imgSrc: "", oldPrice: 0, price: 0 },
           ],
         });
       };
@@ -127,6 +128,10 @@ import {
           setFormData(defaultValueProductForm)
         }
       }, [productForUpdate])
+      
+      useEffect(() => {
+        fetchCategories()
+      }, [])
       
     return (
       <div>
@@ -145,13 +150,7 @@ import {
                     {productForUpdate  ? 'Update Product' : 'Add Product'}
                   </ModalHeader>
                   <ModalBody>
-                  <Input
-                label="Category ID"
-                value={formData.categoryId}
-                onChange={(e) => handleInputChange("categoryId", e.target.value)}
-                variant="bordered"
-                fullWidth
-              />
+                  
               <Input
                 label="Title"
                 value={formData.title}
@@ -162,17 +161,17 @@ import {
               <Input
                 label="Old Price"
                 type="number"
-                value={formData.price !== 0 ? formData.price.toString() : undefined}
+                value={productForUpdate ? formData.oldPrice.toString() : undefined}
                 onChange={(e) =>
                   handleInputChange("oldPrice", e.target.value && parseFloat(e.target.value))
                 }
                 variant="bordered"
                 fullWidth
               />
-              <Input
+              <Input  
                 label="Price"
                 type="number"
-                value={formData.price !== 0 ? formData.price.toString() : undefined}
+                value={productForUpdate ? formData.price.toString() : undefined}
                 onChange={(e) => handleInputChange("price", parseFloat(e.target.value))}
                 variant="bordered"
                 fullWidth
@@ -206,6 +205,7 @@ import {
                 variant="bordered"
                 fullWidth
               />
+              <Select options={categories} label={'Category'} onSelect={handleInputChange}/>
               <CheckboxGroup
                 label="Sizes"
                 value={formData.size}
@@ -238,25 +238,25 @@ import {
 
                 <Checkbox
                     isSelected={formData.isAvailable}
-                    onChange={(checked: boolean) => handleInputChange("isAvailable", checked)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange("isAvailable", e.target.checked)}
                 >
                     Available
                 </Checkbox>
                 <Checkbox
                     isSelected={formData.soldOut}
-                    onChange={(checked: boolean) => handleInputChange("soldOut", checked)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange("soldOut", e.target.checked)}
                 >
                     Sold Out
                 </Checkbox>
                 <Checkbox
                     isSelected={formData.preOrder}
-                    onChange={(checked: boolean) => handleInputChange("preOrder", checked)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange("preOrder", e.target.checked)}
                 >
                     Pre-Order
                 </Checkbox>
                 <Checkbox
                     isSelected={formData.isLookBookProduct}
-                    onChange={(checked: boolean) => handleInputChange("isLookBookProduct", checked)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange("isLookBookProduct", e.target.checked)}
                 >
                     Lookbook Product
                 </Checkbox>
@@ -289,7 +289,7 @@ import {
                     <Input
                       label="Old Price"
                       type="number"
-                      value={colour.oldPrice ?? ""}
+                      value={productForUpdate ? colour.oldPrice.toString() : undefined}
                       onChange={(e) =>
                         handleColourChange(index, "oldPrice", e.target.value ? parseFloat(e.target.value) : undefined)
                       }
@@ -299,7 +299,7 @@ import {
                     <Input
                       label="Price"
                       type="number"
-                      value={colour.price ?? ""}
+                      value={productForUpdate ? colour.price.toString() : undefined}
                       onChange={(e) =>
                         handleColourChange(index, "price", e.target.value ? parseFloat(e.target.value) : undefined)
                       }

@@ -12,7 +12,7 @@ import { DarkModeSwitch } from "./darkmodeswitch";
 import { useRouter } from "next/navigation";
 import { deleteAuthCookie } from "@/actions/auth.action";
 
-export const UserDropdown = () => {
+export const UserDropdown = ({user}: {user: any}) => {
   const router = useRouter();
 
   const handleLogout = useCallback(async () => {
@@ -39,14 +39,8 @@ export const UserDropdown = () => {
           key='profile'
           className='flex flex-col justify-start w-full items-start'>
           <p>Signed in as</p>
-          <p>zoey@example.com</p>
+          <p>{user?.email}</p>
         </DropdownItem>
-        <DropdownItem key='settings'>My Settings</DropdownItem>
-        <DropdownItem key='team_settings'>Team Settings</DropdownItem>
-        <DropdownItem key='analytics'>Analytics</DropdownItem>
-        <DropdownItem key='system'>System</DropdownItem>
-        <DropdownItem key='configurations'>Configurations</DropdownItem>
-        <DropdownItem key='help_and_feedback'>Help & Feedback</DropdownItem>
         <DropdownItem
           key='logout'
           color='danger'

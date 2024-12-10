@@ -19,6 +19,7 @@ import { FilterIcon } from "../icons/sidebar/filter-icon";
 import { useSidebarContext } from "../layout/layout-context";
 import { ChangeLogIcon } from "../icons/sidebar/changelog-icon";
 import { usePathname } from "next/navigation";
+import { OrdersIcon } from "../icons/sidebar/orders-con";
 
 export const SidebarWrapper = () => {
   const pathname = usePathname();
@@ -53,20 +54,17 @@ export const SidebarWrapper = () => {
                 href="accounts"
               />
               <SidebarItem
-                isActive={pathname === "/payments"}
-                title="Payments"
-                icon={<PaymentsIcon />}
-              />
-              <CollapseItems
-                icon={<BalanceIcon />}
-                items={["Banks Accounts", "Credit Cards", "Loans"]}
-                title="Balances"
+                isActive={pathname === "/orders"}
+                title="Orders"
+                icon={<OrdersIcon />}
+                href="/orders"
               />
               <SidebarItem
-                isActive={pathname === "/customers"}
-                title="Customers"
-                icon={<CustomersIcon />}
-                />
+                isActive={pathname === "/coupons"}
+                title="Coupons"
+                href="/coupons"
+                icon={<PaymentsIcon />}
+              />
               <SidebarItem
                 href="/products"
                 isActive={pathname === "/products"}
@@ -78,32 +76,6 @@ export const SidebarWrapper = () => {
                 title="Categories"
                 icon={<ReportsIcon />}
                 href="/categories"
-              />
-            </SidebarMenu>
-
-            <SidebarMenu title="General">
-              <SidebarItem
-                isActive={pathname === "/developers"}
-                title="Developers"
-                icon={<DevIcon />}
-              />
-              <SidebarItem
-                isActive={pathname === "/view"}
-                title="View Test Data"
-                icon={<ViewIcon />}
-              />
-              <SidebarItem
-                isActive={pathname === "/settings"}
-                title="Settings"
-                icon={<SettingsIcon />}
-              />
-            </SidebarMenu>
-
-            <SidebarMenu title="Updates">
-              <SidebarItem
-                isActive={pathname === "/changelog"}
-                title="Changelog"
-                icon={<ChangeLogIcon />}
               />
             </SidebarMenu>
           </div>

@@ -26,8 +26,6 @@ export const Content = () => (
           <h3 className="text-xl font-semibold">Available Balance</h3>
           <div className="grid md:grid-cols-2 grid-cols-1 2xl:grid-cols-3 gap-5  justify-center w-full">
             <CardBalance1 />
-            <CardBalance2 />
-            <CardBalance3 />
           </div>
         </div>
 
