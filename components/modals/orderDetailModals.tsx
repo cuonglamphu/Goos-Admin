@@ -35,15 +35,15 @@ const OrderDetailsModal = ({ isOpen, onClose, order, onStatusChange }: OrderDeta
             <div>
               <h3 className="font-semibold mb-2">Customer Information</h3>
               <p>Name: {order.userId?.firstName} {order.userId?.lastName}</p>
-              <p>Order Date: {format(new Date(order.createdAt), 'dd/MM/yyyy HH:mm')}</p>
-              <p>Total Amount: ${order.total.toFixed(2)}</p>
+              <p>Order Date: {order.createdAt ? format(new Date(order.createdAt), 'dd/MM/yyyy HH:mm') : 'N/A'}</p>
+              <p>Total Amount: ${order.total ? order.total?.toFixed(2) : 'N/A'}</p>
               <p>Payment Status: <span className="font-bold text-green-500">{order.paymentStatus}</span></p>
             </div>
             <div>
               <h3 className="font-semibold mb-2">Order Status</h3>
               <Select
                 label="Status"
-                defaultSelectedKeys={[order.status]}
+                defaultSelectedKeys={[order.status? order.status : 'N/A' as Order['status']]}
                 className="max-w-xs"
                 onChange={(e) => onStatusChange(order.orderNumber, e.target.value)}
               >

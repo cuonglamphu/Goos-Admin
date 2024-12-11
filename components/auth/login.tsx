@@ -20,6 +20,7 @@ export const Login = () => {
 
   const handleLogin = useCallback(
     async (values: LoginFormType) => {
+      console.l
       // `values` contains email & password. You can use provider to connect user
       const response = await login(values.email, values.password);
       console.log(response);

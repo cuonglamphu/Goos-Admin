@@ -68,14 +68,20 @@ const OrdersPage = () => {
     const exportToCSV = () => {
         const csvContent = [
             ['Order Number', 'Date', 'Customer', 'Total', 'Status', 'Payment'],
-            ...filteredOrders.map(order => [
+            ...filteredOrders.map(order => 
+            {
+                console.log(order)
+                console.log("Created At:", order.createdAt);
+                console.log("Is Valid Date:", !isNaN(new Date(order.createdAt).getTime()));
+                return [
                 order.orderNumber,
                 format(new Date(order.createdAt), 'dd/MM/yyyy'),
                 `${order.userId?.firstName} ${order.userId?.lastName}`,
                 order.total.toFixed(2),
                 order.status,
                 order.paymentStatus
-            ])
+            ] 
+        } )
         ].map(e => e.join(",")).join("\n");
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -197,17 +203,17 @@ const OrdersPage = () => {
                                 <tr key={order._id} className="border-b">
                                     <td className="px-4 py-3">#{order.orderNumber}</td>
                                     <td className="px-4 py-3">
-                                        {format(new Date(order.createdAt), 'dd/MM/yyyy')}
+                                        {order.createdAt ? format(new Date(order.createdAt), 'dd/MM/yyyy') : 'N/A'}
                                     </td>
                                     <td className="px-4 py-3">
                                         {
                                             `${order.userId?.firstName} ${order.userId?.lastName}`
                                         }
                                     </td>
-                                    <td className="px-4 py-3">${order.total.toFixed(2)}</td>
+                                    <td className="px-4 py-3">${ order.total ? order.total?.toFixed(2) : 'N/A'}</td>
                                     <td className="px-4 py-3">
-                                        <span className={`px-2 py-1 rounded-full text-xs text-white ${getStatusColor(order.status)}`}>
-                                            {order.status}
+                                        <span className={`px-2 py-1 rounded-full text-xs text-white ${getStatusColor(order.status? order.status : 'N/A' as Order['status']) }`}>
+                                            {order.status? order.status : 'N/A'}
                                         </span>
                                     </td>
                                     <td className="px-4 py-3">
