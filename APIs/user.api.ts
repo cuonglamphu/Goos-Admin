@@ -1,7 +1,7 @@
 const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL as string
 
 export const getAllUser = async () => {
-    const response = await fetch(`${NEXT_PUBLIC_API_URL}/user`, {
+    const response = await fetch(`${NEXT_PUBLIC_API_URL}user`, {
         method: 'GET',
         headers: {
             authorization: 'Bearer '
