@@ -8,7 +8,8 @@ const login = async (email: string, password: string) => {
     },
     body: JSON.stringify({ email, password }),
   });
-  return response.json();
+  const data = await response.json();
+  return data;
 };
 
 export default login;

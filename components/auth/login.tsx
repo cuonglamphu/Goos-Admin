@@ -22,6 +22,7 @@ export const Login = () => {
     async (values: LoginFormType) => {
       // `values` contains email & password. You can use provider to connect user
       const response = await login(values.email, values.password);
+      console.log(response);
       if (response.success && response.data.user ) {
         if(response.data.user.isAdmin === true){
           await createAuthCookie(response.data.token);
@@ -78,13 +79,6 @@ export const Login = () => {
           </>
         )}
       </Formik>
-
-      <div className='font-light text-slate-400 mt-4 text-sm'>
-        Don&apos;t have an account ?{" "}
-        <Link href='/register' className='font-bold'>
-          Register here
-        </Link>
-      </div>
     </>
   );
 };
